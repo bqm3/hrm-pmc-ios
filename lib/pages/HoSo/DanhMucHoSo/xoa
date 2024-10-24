@@ -1,0 +1,581 @@
+Future<void> _showAddInfoDialog(BuildContext context) async {
+  final TextEditingController hoTenController = TextEditingController();
+  final TextEditingController ngaySinhController = TextEditingController();
+  final TextEditingController diaChiController = TextEditingController();
+  final TextEditingController ngheNghiepController = TextEditingController();
+  final TextEditingController maSoThueController = TextEditingController();
+  final TextEditingController soCmtController = TextEditingController();
+  final TextEditingController ngayCmtController = TextEditingController();
+  final TextEditingController noiCmtController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  final AuthService authService = Get.find<AuthService>();
+  String? ma = await authService.ma;
+
+  if (ma == null) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Mã không hợp lệ.')),
+    );
+    return;
+  }
+
+  bool _hoTenError = false;
+  bool _ngaySinhError = false;
+  bool _ngaySinhError2 = false;
+  bool _diaChiError = false;
+
+  bool validateDateFormat(String date) {
+    final RegExp datePattern = RegExp(r"^\d{2}/\d{2}/\d{4}$");
+    return datePattern.hasMatch(date);
+  }
+
+  bool validateCCCD(String cccd) {
+    final RegExp cccdPattern = RegExp(r"^\d{12}$");
+    return cccdPattern.hasMatch(cccd);
+  }
+
+  final LoaiQuanHeController quanHeController =
+      Get.put(LoaiQuanHeController(LoaiQuanHeRepository()));
+
+  String? selectedQuanHe;
+
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12.r),
+        ),
+        child: SingleChildScrollView(
+          child: Container(
+            padding: EdgeInsets.all(16.0),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12.r),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(height: 8.h),
+                Text(
+                  'Họ tên',
+                  style: TextStyle(
+                    fontFamily: 'Arimo',
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 6.h),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12.0, vertical: 1.0),
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: _hoTenError ? Colors.red : Colors.grey,
+                          width: 0.5,
+                        ),
+                        borderRadius: BorderRadius.circular(10.0.r),
+                        color: Colors.white,
+                      ),
+                      child: TextField(
+                        controller: hoTenController,
+                        style: TextStyle(
+                          fontFamily: 'Arimo',
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.normal,
+                        ),
+                        decoration: InputDecoration(
+                          border: InputBorder.none,
+                          hintText: 'Nhập họ tên...',
+                          hintStyle: TextStyle(
+                            color: Colors.grey,
+                            fontFamily: 'Arimo',
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.normal,
+                          ),
+                        ),
+                      ),
+                    ),
+                    if (_hoTenError)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 5.0),
+                        child: Text(
+                          'Vui lòng nhập họ tên.',
+                          style: TextStyle(color: Colors.red, fontSize: 12.sp),
+                        ),
+                      ),
+                  ],
+                ),
+                SizedBox(height: 12.h),
+                Text(
+                  'Quan hệ',
+                  style: TextStyle(
+                    fontFamily: 'Arimo',
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 6.h),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 12.0, vertical: 1.0),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey, width: 0.5),
+                    borderRadius: BorderRadius.circular(10.0.r),
+                    color: Colors.white,
+                  ),
+                  child: DropdownButton<String>(
+                    hint: const Text('Chọn quan hệ'),
+                    value: selectedQuanHe,
+                    isExpanded: true,
+                    underline: Container(),
+                    items: quanHeController.quanHeList.map((LoaiQuanHe quanHe) {
+                      return DropdownMenuItem<String>(
+                        value: quanHe.ma,
+                        child: Text(quanHe.ten),
+                      );
+                    }).toList(),
+                    onChanged: (String? newValue) {
+                      selectedQuanHe = newValue;
+                    },
+                  ),
+                ),
+                SizedBox(height: 12.h),
+                Text(
+                  'Ngày sinh',
+                  style: TextStyle(
+                    fontFamily: 'Arimo',
+                    fontSize: 12.h,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 8.h),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 12.0, vertical: 1.0),
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                        color: _ngaySinhError ? Colors.red : Colors.grey,
+                        width: 0.5),
+                    borderRadius: BorderRadius.circular(10.0.r),
+                    color: Colors.white,
+                  ),
+                  child: TextField(
+                    controller: ngaySinhController,
+                    style: TextStyle(
+                      fontFamily: 'Arimo',
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.normal,
+                    ),
+                    decoration: InputDecoration(
+                      border: InputBorder.none,
+                      hintText: 'Nhập ngày sinh...',
+                      errorText: _ngaySinhError2
+                          ? 'Nhập đúng định dạng dd/mm/yyyy'
+                          : null,
+                      hintStyle: TextStyle(
+                        color: Colors.grey,
+                        fontFamily: 'Arimo',
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.normal,
+                      ),
+                    ),
+                  ),
+                ),
+                if (_ngaySinhError)
+                  Padding(
+                    padding: EdgeInsets.only(top: 8.0),
+                    child: Text(
+                      'Vui lòng nhập ngày sinh',
+                      style: TextStyle(
+                        color: Colors.red,
+                        fontSize: 12.sp,
+                      ),
+                    ),
+                  ),
+                SizedBox(height: 12.h),
+                Text(
+                  'Địa chỉ',
+                  style: TextStyle(
+                    fontFamily: 'Arimo',
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 6.h),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12.0, vertical: 1.0),
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: _diaChiError ? Colors.red : Colors.grey,
+                          width: 0.5,
+                        ),
+                        borderRadius: BorderRadius.circular(10.0.r),
+                        color: Colors.white,
+                      ),
+                      child: TextField(
+                        controller: diaChiController,
+                        style: TextStyle(
+                          fontFamily: 'Arimo',
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.normal,
+                        ),
+                        decoration: InputDecoration(
+                          border: InputBorder.none,
+                          hintText: 'Nhập địa chỉ...',
+                          hintStyle: TextStyle(
+                            color: Colors.grey,
+                            fontFamily: 'Arimo',
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.normal,
+                          ),
+                        ),
+                      ),
+                    ),
+                    if (_diaChiError)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 5.0),
+                        child: Text(
+                          'Vui lòng nhập địa chỉ.',
+                          style: TextStyle(color: Colors.red, fontSize: 12.sp),
+                        ),
+                      ),
+                  ],
+                ),
+                SizedBox(height: 12.h),
+                Text(
+                  'Nghề nghiệp',
+                  style: TextStyle(
+                    fontFamily: 'Arimo',
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 6.h),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12.0, vertical: 1.0),
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: Colors.grey,
+                          width: 0.5,
+                        ),
+                        borderRadius: BorderRadius.circular(10.0.r),
+                        color: Colors.white,
+                      ),
+                      child: TextField(
+                        controller: ngheNghiepController,
+                        style: TextStyle(
+                          fontFamily: 'Arimo',
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.normal,
+                        ),
+                        decoration: InputDecoration(
+                          border: InputBorder.none,
+                          hintText: 'Nhập nghề nghiệp...',
+                          hintStyle: TextStyle(
+                            color: Colors.grey,
+                            fontFamily: 'Arimo',
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.normal,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 12.h),
+                Text(
+                  'Mã số thuế',
+                  style: TextStyle(
+                    fontFamily: 'Arimo',
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 6.h),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12.0, vertical: 1.0),
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: Colors.grey,
+                          width: 0.5,
+                        ),
+                        borderRadius: BorderRadius.circular(10.0.r),
+                        color: Colors.white,
+                      ),
+                      child: TextField(
+                        controller: maSoThueController,
+                        style: TextStyle(
+                          fontFamily: 'Arimo',
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.normal,
+                        ),
+                        decoration: InputDecoration(
+                          border: InputBorder.none,
+                          hintText: 'Nhập mã số thuế...',
+                          hintStyle: TextStyle(
+                            color: Colors.grey,
+                            fontFamily: 'Arimo',
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.normal,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 12.h),
+                Text(
+                  'CCCD/CMND',
+                  style: TextStyle(
+                    fontFamily: 'Arimo',
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 6.h),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12.0, vertical: 1.0),
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: Colors.grey,
+                          width: 0.5,
+                        ),
+                        borderRadius: BorderRadius.circular(10.0.r),
+                        color: Colors.white,
+                      ),
+                      child: TextField(
+                        controller: soCmtController,
+                        style: TextStyle(
+                          fontFamily: 'Arimo',
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.normal,
+                        ),
+                        decoration: InputDecoration(
+                          border: InputBorder.none,
+                          hintText: 'Nhập CCCD/CMND...',
+                          hintStyle: TextStyle(
+                            color: Colors.grey,
+                            fontFamily: 'Arimo',
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.normal,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 12.h),
+                Text(
+                  'Ngày cấp',
+                  style: TextStyle(
+                    fontFamily: 'Arimo',
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 6.h),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12.0, vertical: 1.0),
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: Colors.grey,
+                          width: 0.5,
+                        ),
+                        borderRadius: BorderRadius.circular(10.0.r),
+                        color: Colors.white,
+                      ),
+                      child: TextField(
+                        controller: ngayCmtController,
+                        style: TextStyle(
+                          fontFamily: 'Arimo',
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.normal,
+                        ),
+                        decoration: InputDecoration(
+                          border: InputBorder.none,
+                          hintText: 'Nhập ngày cấp...',
+                          hintStyle: TextStyle(
+                            color: Colors.grey,
+                            fontFamily: 'Arimo',
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.normal,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 12.h),
+                Text(
+                  'Nơi cấp',
+                  style: TextStyle(
+                    fontFamily: 'Arimo',
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 6.h),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12.0, vertical: 1.0),
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: Colors.grey,
+                          width: 0.5,
+                        ),
+                        borderRadius: BorderRadius.circular(10.0.r),
+                        color: Colors.white,
+                      ),
+                      child: TextField(
+                        controller: noiCmtController,
+                        style: TextStyle(
+                          fontFamily: 'Arimo',
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.normal,
+                        ),
+                        decoration: InputDecoration(
+                          border: InputBorder.none,
+                          hintText: 'Nhập nơi cấp...',
+                          hintStyle: TextStyle(
+                            color: Colors.grey,
+                            fontFamily: 'Arimo',
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.normal,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 18.h),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      flex: 4,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          border: Border.all(color: Colors.black, width: 0.7),
+                          borderRadius: BorderRadius.circular(10.0.r),
+                        ),
+                        child: CupertinoButton(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 10),
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(10.0.r),
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                          child: Text(
+                            'Quay lại',
+                            style: TextStyle(
+                              fontFamily: 'Arimo',
+                              color: Colors.black,
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.normal,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const Spacer(),
+                    Expanded(
+                      flex: 4,
+                      child: CupertinoButton(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 10),
+                        color: AppColors.blueVNPT,
+                        borderRadius: BorderRadius.circular(10.0),
+                        onPressed: () async {
+                          _hoTenError = hoTenController.text.isEmpty;
+                          _ngaySinhError = ngaySinhController.text.isEmpty;
+                          _ngaySinhError2 =
+                              !validateDateFormat(ngaySinhController.text);
+                          _diaChiError = diaChiController.text.isEmpty;
+
+                          if (_hoTenError ||
+                              _ngaySinhError ||
+                              _ngaySinhError2 ||
+                              _diaChiError) {
+                            // Hiển thị thông báo lỗi
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                  content:
+                                      Text('Vui lòng điền đầy đủ thông tin.')),
+                            );
+                            return;
+                          }
+
+                          print('Họ tên: ${hoTenController.text}');
+                          print('Ngày sinh: ${ngaySinhController.text}');
+                          print('Địa chỉ: ${diaChiController.text}');
+                          print('Nghề nghiệp: ${ngheNghiepController.text}');
+                          print('Mã số thuế: ${maSoThueController.text}');
+                          print('CCCD/CMND: ${soCmtController.text}');
+                          print('Ngày cấp: ${ngayCmtController.text}');
+                          print('Nơi cấp: ${noiCmtController.text}');
+                          print('Quan hệ: $selectedQuanHe');
+
+                          // Gọi API để thêm quan hệ
+                          final response = await postQuanHe(
+                            ma: ma,
+                            quanHe: selectedQuanHe!,
+                            hoTen: hoTenController.text,
+                            ngaySinh: ngaySinhController.text,
+                            diaChi: diaChiController.text,
+                            ngheNghiep: ngheNghiepController.text,
+                            maSoThue: maSoThueController.text,
+                            soCmt: soCmtController.text,
+                            ngayCmt: ngayCmtController.text,
+                            noiCmt: noiCmtController.text,
+                          );
+                        },
+                        child: Text(
+                          'Xác nhận',
+                          style: TextStyle(
+                            fontFamily: 'Arimo',
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.normal,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    },
+  );
+}

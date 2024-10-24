@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1020659991482",
+    "project_id": "hrm-pmc",
+    "storage_bucket": "hrm-pmc.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1020659991482:android:24b84c9fbad0b5aa789383",
+        "android_client_info": {
+          "package_name": "com.example.vnpt_hrm"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDVrIA-hJ-5j7PbvbzaeOf4u8LyBsiO2oo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
